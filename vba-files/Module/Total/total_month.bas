@@ -43,14 +43,17 @@ Public Sub cleanTotalMonth()
   lastCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, firstCol)
 
-  With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(firstRow, firstCol), Cells(lastRow + 1, lastCol))
-  .unMerge
-  .ClearContents
-  .Interior.Color = xlNone
-  .Font.Bold = False
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(firstRow, firstCol), Cells(lastRow + 1, lastCol + 1))
+    .unMerge
+    .ClearContents
+    .Interior.Color = xlNone
+    .Font.Bold = False
+    .HorizontalAlignment = xlLeft
+    .VerticalAlignment = xlCenter
+    .IndentLevel = 0
   End With
 
-  Call utils_sheets.clearBorders(SHEET_NAME_TOTAL_MONTH, Range(Cells(firstRow, firstCol), Cells(lastRow, lastCol)).Address)
+  Call utils_sheets.clearBorders(SHEET_NAME_TOTAL_MONTH, Range(Cells(firstRow, firstCol), Cells(lastRow + 1, lastCol + 1)).Address)
 
 End Sub
 
@@ -148,17 +151,19 @@ Sub ConsolidateTotalMois()
   With Sheets(SHEET_NAME_TOTAL_MONTH).Range("C3")
     .Value = "NOM - PRENOM"
     .Font.Bold = True
-    .HorizontalAlignment = xlCenter
+    .HorizontalAlignment = xlLeft
     .VerticalAlignment = xlCenter
     .Interior.color = COLOR_CEL_READ_H1
+    .IndentLevel = 1
   End With
 
   With Sheets(SHEET_NAME_TOTAL_MONTH).Range("D3")
     .Value = "ENTREPRISE"
     .Font.Bold = True
-    .HorizontalAlignment = xlCenter
+    .HorizontalAlignment = xlLeft
     .VerticalAlignment = xlCenter
     .Interior.color = COLOR_CEL_READ_H1
+    .IndentLevel = 1
   End With
 
   ' Set references to worksheets
@@ -201,8 +206,22 @@ Sub ConsolidateTotalMois()
           Else
             ' Always add to the next available row after the last filled row, ensuring it's at least row 4
             EmployeeRow = Application.WorksheetFunction.Max(4, wsConsolidation.Cells(wsConsolidation.Rows.Count, 3).End(xlUp).Row + 1)
-            wsConsolidation.Cells(EmployeeRow, 3).Value = employeeName
-            wsConsolidation.Cells(EmployeeRow, 4).Value = employeeCompany
+            With wsConsolidation.Cells(EmployeeRow, 3)
+              .Value = employeeName
+              .Font.Bold = True
+              .HorizontalAlignment = xlLeft
+              .VerticalAlignment = xlCenter
+              .IndentLevel = 1
+              .Interior.Color = COLOR_CEL_READ_CONTENT
+            End With
+            With wsConsolidation.Cells(EmployeeRow, 4)
+              .Value = employeeCompany
+              .Font.Bold = False
+              .HorizontalAlignment = xlLeft
+              .VerticalAlignment = xlCenter
+              .IndentLevel = 1
+              .Interior.Color = COLOR_CEL_READ_CONTENT
+            End With
           End If
   
           ' Copy hours for each day and site
