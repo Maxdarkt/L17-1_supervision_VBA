@@ -1,4 +1,4 @@
-Attribute VB_Name = "send_report_shift"
+Attribute VB_Name = "print_report"
 'namespace=vba-files/Module/Files
 Option Explicit
 
@@ -6,10 +6,10 @@ Option Explicit
 Public Sub generatePDF()
 
   ' 0 - clean plage
-  Call send_report_shift.cleanGeneratePDF()
+  Call print_report.cleanGeneratePDF()
   
   ' 1 - generer les dates et les ovurages
-  Call send_report_shift.generateAllReportsInPDF()
+  Call print_report.generateAllReportsInPDF()
 
 End Sub
 
@@ -93,7 +93,7 @@ Public Function printManyReportsInPDF(wbSite As Workbook, firstDay As Date, last
   ' spécifier le numéro de semaine
   nbWeek = DatePart("ww", firstDay, vbMonday)
   ' Spécifiez le chemin de sortie pour le PDF combiné
-  outputPath = send_report_shift.getPathExportPDF("PDF\") & yearOfReport & "_S-" & nbWeek & "_Rapport_de_poste_OA" & workzone & ".pdf"
+  outputPath = print_report.getPathExportPDF("PDF\") & yearOfReport & "_S-" & nbWeek & "_Rapport_de_poste_OA" & workzone & ".pdf"
   ' print area
   address = "AA3:AR107"
 
