@@ -139,9 +139,27 @@ Sub ConsolidateTotalMois()
   Dim lastRowConfig As Long, i As Long
   Dim wbSite As Workbook, wsSite As Worksheet
   Dim lastRowSite As Long, j As Long, colOffset As Integer
-  Dim employeeName As String, Hours As Variant
+  Dim employeeName As String
+  Dim employeeCompany As String
+  Dim Hours As Variant
   Dim wsSiteWorkZone As String
   DIm siteColOffset As Integer
+
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("C3")
+    .Value = "NOM - PRENOM"
+    .Font.Bold = True
+    .HorizontalAlignment = xlCenter
+    .VerticalAlignment = xlCenter
+    .Interior.color = COLOR_CEL_READ_H1
+  End With
+
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("D3")
+    .Value = "ENTREPRISE"
+    .Font.Bold = True
+    .HorizontalAlignment = xlCenter
+    .VerticalAlignment = xlCenter
+    .Interior.color = COLOR_CEL_READ_H1
+  End With
 
   ' Set references to worksheets
   Set wsConfig = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
@@ -149,9 +167,12 @@ Sub ConsolidateTotalMois()
 
   ' Find last row in CONFIG sheet
   lastRowConfig = wsConfig.Cells(wsConfig.Rows.Count, 4).End(xlUp).Row
-
+  
   ' Loop through each site
   For i = 5 To lastRowConfig
+    ' Désactiver les messages d'alerte
+    Application.DisplayAlerts = False
+    Application.AskToUpdateLinks = False
       ' Open site workbook
       Set wbSite = Workbooks.Open(wsConfig.Cells(i, 4).Value)
       Set wsSite = wbSite.Sheets(SHEET_NAME_TOTAL_MONTH)
@@ -168,8 +189,9 @@ Sub ConsolidateTotalMois()
         Dim FoundCell As Range
 
         employeeName = wsSite.Cells(j, 3).Value
+        employeeCompany = wsSite.Cells(j, 4).Value
 
-        If employeeName <> "" Then
+        If employeeName <> "" And Len(employeeName) > 1  Then
 
           Set FoundCell = wsConsolidation.Columns(3).Find(employeeName)
   
@@ -177,12 +199,10 @@ Sub ConsolidateTotalMois()
           If Not FoundCell Is Nothing Then
             EmployeeRow = FoundCell.Row
           Else
-            If wsConsolidation.Cells(wsConsolidation.Rows.Count, 3).End(xlUp).Row < 4 Then
-              EmployeeRow = 4
-            Else
-              EmployeeRow = wsConsolidation.Cells(wsConsolidation.Rows.Count, 3).End(xlUp).Row + 1
-            End If  
+            ' Always add to the next available row after the last filled row, ensuring it's at least row 4
+            EmployeeRow = Application.WorksheetFunction.Max(4, wsConsolidation.Cells(wsConsolidation.Rows.Count, 3).End(xlUp).Row + 1)
             wsConsolidation.Cells(EmployeeRow, 3).Value = employeeName
+            wsConsolidation.Cells(EmployeeRow, 4).Value = employeeCompany
           End If
   
           ' Copy hours for each day and site
@@ -204,6 +224,9 @@ Sub ConsolidateTotalMois()
           Next colOffset
         End If
       Next j
+      ' Activer les messages d'alerte
+      Application.DisplayAlerts = True
+      Application.AskToUpdateLinks = True
       ' Close site workbook
       wbSite.Close SaveChanges:=False
   Next i
@@ -344,7 +367,8 @@ Sub addSumByRow()
   ' on ajuste le départ de la colonne
   firstColTotalByWorkzone = firstColTotalByWorkzone + 1
   ' on nomme la colonne
-  With Sheets(SHEET_NAME_TOTAL_MONTH).Cells(3, lastColTotalByWorkzone + 1)
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(2, lastColTotalByWorkzone + 1), Cells(3, lastColTotalByWorkzone + 1))
+    .Merge
     .value = "TOTAL"
     .Font.Bold = True
     .HorizontalAlignment = xlCenter
