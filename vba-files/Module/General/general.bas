@@ -49,46 +49,151 @@ Public  Sub DefineGlobalVariables()
   COLOR_CEL_TM_DAY_WORKED = RGB(204, 255, 204)
   COLOR_CEL_TM_DAY_NOT_WORKED = RGB(83, 141, 213)
   
-  ' Call general.main()
 End Sub
 
-Public Sub main()
+Public Sub initConfig()
   Call general.cleanCells()
-  Call general.getAllExcelFiles()
+  Call general.initFilesByWorkzone()
+  Call general.initWorkedDays()
 End Sub
 
 Public Sub cleanCells()
   Dim address As String
   Dim lastRow As Integer
 
-  lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_CONFIG, 11)
+  address = "E5:G10"
 
-  address = "K4:K" & lastRow
+  Sheets(SHEET_NAME_CONFIG).Range(address).ClearContents
+
+  address = "K5:P16"
 
   Sheets(SHEET_NAME_CONFIG).Range(address).ClearContents
 
 End Sub
 
-Public Sub getAllExcelFiles()
-  Dim pathFolder As String
-  Dim filename As String
-  Dim pathFilename As String
+' ancienne fonction pour aller récupérer les fichiers dans un dossier
+' Public Sub getAllExcelFiles()
+'   Dim pathFolder As String
+'   Dim filename As String
+'   Dim pathFilename As String
+'   Dim i As Integer
+  
+'   i = 0
+  
+'   ' Spécifiez le chemin du dossier contenant les fichiers Excel
+'   pathFolder = utils_path.getPathFolder("reports\")
+  
+'   filename = Dir(pathFolder & "*.xls*")
+'   ' Parcourez tous les fichiers Excel dans le dossier
+'   Do While filename <> ""
+'     ' Construisez le chemin complet du fichier
+'     pathFilename = pathFolder & filename
+'     ' On écrit les chemins des fichiers dans la feuille CONFIG
+'     Sheets(SHEET_NAME_CONFIG).Cells(5 + i, 11).Value = pathFilename
+'     ' Obtenez le prochain fichier Excel dans le dossier
+'     filename = Dir
+'     i = i + 1
+'   Loop
+' End Sub
+
+Sub initFilesByWorkzone()
+
+  Dim wsSupervisionConfig As Worksheet
+  Dim LastRow As Long, i As Long
+  Dim FilePath As String
+  Dim wbSite As Workbook, wsSite As Worksheet
+  Dim firstRow As Integer
+
+  firstRow = 5
+  
+  ' Référence à la feuille CONFIG du classeur de consolidation
+  Set wsSupervisionConfig = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
+  
+  ' Trouver la dernière ligne dans la colonne "LIEN DES FICHIERS"
+  LastRow = wsSupervisionConfig.Cells(wsSupervisionConfig.Rows.Count, 4).End(xlUp).Row
+  
+  For i = firstRow To LastRow
+    FilePath = wsSupervisionConfig.Cells(i, 4).Value
+    
+    ' Vérifier si le chemin est valide
+    If FilePath <> "" Or Len(Dir(FilePath)) > 0 Then
+      ' Ouvrir le fichier
+      Set wbSite = Workbooks.Open(FilePath)
+      Set wsSite = wbSite.Sheets(SHEET_NAME_CONFIG)
+      
+      ' Lire les données et les mettre dans le classeur de consolidation
+      wsSupervisionConfig.Cells(i, 5).Value = wsSite.Range("E36").Value
+      wsSupervisionConfig.Cells(i, 6).Value = wsSite.Range("F22").Value
+      wsSupervisionConfig.Cells(i, 7).Value = wsSite.Range("F24").Value
+      wsSupervisionConfig.Cells(i, 8).Value = wsSite.Range("E32").Value
+      
+      ' Fermer le fichier de site
+      wbSite.Close SaveChanges:=False
+    Else
+      ' Si le chemin n'est pas valide, insérer un message d'erreur dans les colonnes "OUVRAGE", "DEBUT", et "FIN"
+      wsSupervisionConfig.Cells(i, 5).Value = "Erreur: Lien invalide"
+      wsSupervisionConfig.Cells(i, 6).Value = "Erreur: Lien invalide"
+      wsSupervisionConfig.Cells(i, 7).Value = "Erreur: Lien invalide"
+      wsSupervisionConfig.Cells(i, 8).Value = "Erreur: Lien invalide"
+    End If
+  Next i
+End Sub
+
+Sub initWorkedDays()
+  Dim wsSupervisionConfig As Worksheet
+  Dim wbSite As Workbook, wsSite As Worksheet
+  Dim filePath As String
+
+  filePath = Sheets(SHEET_NAME_CONFIG).Range("D5").Value
+
+  Set wbSite = Workbooks.Open(FilePath)
+  Set wsSite = wbSite.Sheets(SHEET_NAME_CONFIG)
+
+  ' Référence à la feuille CONFIG du classeur de consolidation
+  Set wsSupervisionConfig = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
+
+  wsSite.Range("C7:H18").Copy
+  wsSupervisionConfig.Range("K5:P16").PasteSpecial xlPasteValues
+  
+  'Fermez le fichier du site
+  wbSite.Close SaveChanges:=False
+End Sub
+
+Function getListWorkzones() As Variant
+  Dim ws As Worksheet
+  Dim listWorkzones() As Variant
+  Dim lastRow As Long
+  Dim i As Long
+  
+  ' Spécifiez le nom de la feuille
+  Set ws = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
+  
+  ' Trouver la dernière ligne avec des données dans la colonne E (à partir de la cellule E5)
+  lastRow = ws.Cells(ws.Rows.Count, "E").End(xlUp).Row
+  
+  ' Redimensionnez le tableau pour correspondre au nombre d'ouvrages
+  ReDim listWorkzones(1 To lastRow - 4, 1 To 2) ' Soustrayez 4 pour exclure les 4 premières lignes
+  
+  ' Parcourez les cellules dans la colonne E à partir de la cellule E5
+  For i = 5 To lastRow
+      ' Stockez la valeur de la cellule E dans la colonne 1 du tableau (ouvrage)
+      listWorkzones(i - 4, 1) = ws.Cells(i, "E").Value
+      ' Stockez la valeur de la cellule I dans la colonne 2 du tableau (code couleur)
+      listWorkzones(i - 4, 2) = ws.Cells(i, "I").Interior.Color
+  Next i
+  
+  ' Renvoyer le tableau comme résultat de la fonction
+  getListWorkzones = listWorkzones
+End Function
+
+Function getPositionWorkzonesInArray(workzone As String, workzones() As Variant) As Integer
   Dim i As Integer
   
-  i = 0
-  
-  ' Spécifiez le chemin du dossier contenant les fichiers Excel
-  pathFolder = utils_path.getPathFolder("reports\")
-  
-  filename = Dir(pathFolder & "*.xls*")
-  ' Parcourez tous les fichiers Excel dans le dossier
-  Do While filename <> ""
-    ' Construisez le chemin complet du fichier
-    pathFilename = pathFolder & filename
-    ' On écrit les chemins des fichiers dans la feuille CONFIG
-    Sheets(SHEET_NAME_CONFIG).Cells(5 + i, 11).Value = pathFilename
-    ' Obtenez le prochain fichier Excel dans le dossier
-    filename = Dir
-    i = i + 1
-  Loop
-End Sub
+  For i = LBound(workzones) To UBound(workzones)
+    If workzones(i, 1) = workzone Then
+      getPositionWorkzonesInArray = i
+      Exit Function
+    End If
+  Next i
+End Function
+
