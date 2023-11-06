@@ -33,7 +33,7 @@ Public ARR_CODE_ACTIVITIES_INFOS AS Collection
 
 Public  Sub DefineGlobalVariables()
   
-  ' On définit les variables couleurs
+  ' On definit les variables couleurs
   COLOR_CEL_WHITE = RGB(255, 255, 255)
   COLOR_CEL_READ_H1 = RGB(166, 166, 166)
   COLOR_CEL_READ_H2 = RGB(191, 191, 191)
@@ -71,7 +71,7 @@ Public Sub cleanCells()
 
 End Sub
 
-' ancienne fonction pour aller récupérer les fichiers dans un dossier
+' ancienne fonction pour aller recuperer les fichiers dans un dossier
 ' Public Sub getAllExcelFiles()
 '   Dim pathFolder As String
 '   Dim filename As String
@@ -80,7 +80,7 @@ End Sub
   
 '   i = 0
   
-'   ' Spécifiez le chemin du dossier contenant les fichiers Excel
+'   ' Specifiez le chemin du dossier contenant les fichiers Excel
 '   pathFolder = utils_path.getPathFolder("reports\")
   
 '   filename = Dir(pathFolder & "*.xls*")
@@ -88,7 +88,7 @@ End Sub
 '   Do While filename <> ""
 '     ' Construisez le chemin complet du fichier
 '     pathFilename = pathFolder & filename
-'     ' On écrit les chemins des fichiers dans la feuille CONFIG
+'     ' On ecrit les chemins des fichiers dans la feuille CONFIG
 '     Sheets(SHEET_NAME_CONFIG).Cells(5 + i, 11).Value = pathFilename
 '     ' Obtenez le prochain fichier Excel dans le dossier
 '     filename = Dir
@@ -106,7 +106,7 @@ Sub initFilesByWorkzone()
 
   firstRow = 5
   
-  ' Référence à la feuille CONFIG du classeur de consolidation
+  ' Reference a la feuille CONFIG du classeur de consolidation
   Set wsSupervisionConfig = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
   
   ' Trouver la dernière ligne dans la colonne "LIEN DES FICHIERS"
@@ -114,14 +114,14 @@ Sub initFilesByWorkzone()
   
   For i = firstRow To LastRow
     FilePath = wsSupervisionConfig.Cells(i, 4).Value
-    
-    ' Vérifier si le chemin est valide
+
+    ' Verifier si le chemin est valide
     If FilePath <> "" Or Len(Dir(FilePath)) > 0 Then
       ' Ouvrir le fichier
       Set wbSite = Workbooks.Open(FilePath)
       Set wsSite = wbSite.Sheets(SHEET_NAME_CONFIG)
       
-      ' Lire les données et les mettre dans le classeur de consolidation
+      ' Lire les donnees et les mettre dans le classeur de consolidation
       wsSupervisionConfig.Cells(i, 5).Value = wsSite.Range("E36").Value
       wsSupervisionConfig.Cells(i, 6).Value = wsSite.Range("F22").Value
       wsSupervisionConfig.Cells(i, 7).Value = wsSite.Range("F24").Value
@@ -130,7 +130,7 @@ Sub initFilesByWorkzone()
       ' Fermer le fichier de site
       wbSite.Close SaveChanges:=False
     Else
-      ' Si le chemin n'est pas valide, insérer un message d'erreur dans les colonnes "OUVRAGE", "DEBUT", et "FIN"
+      ' Si le chemin n'est pas valide, inserer un message d'erreur dans les colonnes "OUVRAGE", "DEBUT", et "FIN"
       wsSupervisionConfig.Cells(i, 5).Value = "Erreur: Lien invalide"
       wsSupervisionConfig.Cells(i, 6).Value = "Erreur: Lien invalide"
       wsSupervisionConfig.Cells(i, 7).Value = "Erreur: Lien invalide"
@@ -149,7 +149,7 @@ Sub initWorkedDays()
   Set wbSite = Workbooks.Open(FilePath)
   Set wsSite = wbSite.Sheets(SHEET_NAME_CONFIG)
 
-  ' Référence à la feuille CONFIG du classeur de consolidation
+  ' Reference a la feuille CONFIG du classeur de consolidation
   Set wsSupervisionConfig = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
 
   wsSite.Range("C7:H18").Copy
@@ -165,16 +165,16 @@ Function getListWorkzones() As Variant
   Dim lastRow As Long
   Dim i As Long
   
-  ' Spécifiez le nom de la feuille
+  ' Specifiez le nom de la feuille
   Set ws = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
   
-  ' Trouver la dernière ligne avec des données dans la colonne E (à partir de la cellule E5)
+  ' Trouver la dernière ligne avec des donnees dans la colonne E (a partir de la cellule E5)
   lastRow = ws.Cells(ws.Rows.Count, "E").End(xlUp).Row
   
   ' Redimensionnez le tableau pour correspondre au nombre d'ouvrages
   ReDim listWorkzones(1 To lastRow - 4, 1 To 2) ' Soustrayez 4 pour exclure les 4 premières lignes
   
-  ' Parcourez les cellules dans la colonne E à partir de la cellule E5
+  ' Parcourez les cellules dans la colonne E a partir de la cellule E5
   For i = 5 To lastRow
       ' Stockez la valeur de la cellule E dans la colonne 1 du tableau (ouvrage)
       listWorkzones(i - 4, 1) = ws.Cells(i, "E").Value
@@ -182,7 +182,7 @@ Function getListWorkzones() As Variant
       listWorkzones(i - 4, 2) = ws.Cells(i, "I").Interior.Color
   Next i
   
-  ' Renvoyer le tableau comme résultat de la fonction
+  ' Renvoyer le tableau comme resultat de la fonction
   getListWorkzones = listWorkzones
 End Function
 

@@ -45,33 +45,32 @@ Sub getAllCodeActivities()
   Dim LastRow As Long, LastCol As Long, i As Long
   Dim nameOA As String
 
-  'Référencez la feuille de configuration
+  'Referencez la feuille de configuration
   Set wsConfig = ThisWorkbook.Sheets("CONFIG")
-
   
-  'Référencez la feuille de CODE_ACTIVITIES
+  'Referencez la feuille de CODE_ACTIVITIES
   Set wsCodeActivities = ThisWorkbook.Sheets("CODE_ACTIVITES")
   
-  'Désactivez les messages d'alerte
+  'Desactivez les messages d'alerte
   Application.DisplayAlerts = False
   
-  'Parcourir la plage des fichiers à partir de K5
+  'Parcourir la plage des fichiers a partir de D5
   i = 5
-  Do While wsConfig.Cells(i, 11).Value <> ""
-    strFichier = wsConfig.Cells(i, 11).Value
+  Do While wsConfig.Cells(i, 4).Value <> ""
+    strFichier = wsConfig.Cells(i, 4).Value
   
     'Ouvrez le fichier du site
     Set wbSite = Workbooks.Open(strFichier)
-    'on récupère le nom de l'ouvrage
+    'on recupère le nom de l'ouvrage
     nameOA = wbSite.Sheets("CONFIG").Range("E36").value
-    'Référencez la feuille CODE_ACTIVITIES du site
+    'Referencez la feuille CODE_ACTIVITIES du site
     Set wsSite = wbSite.Sheets("CODE_ACTIVITES")
 
-    'Déterminez la dernière colonne et ligne du site
+    'Determinez la dernière colonne et ligne du site
     LastCol = wsSite.Cells(4, wsSite.Columns.Count).End(xlToLeft).Column
     LastRow = wsSite.Cells(wsSite.Rows.Count, 1).End(xlUp).Row
     
-    'Déterminez où ajouter les données dans ce classeur
+    'Determinez où ajouter les donnees dans ce classeur
     Dim DestRow As Long
     If i = 5 Then
       DestRow = 5
@@ -83,7 +82,7 @@ Sub getAllCodeActivities()
     wsSite.Range(wsSite.Cells(4, 1), wsSite.Cells(LastRow, LastCol)).Copy
     wsCodeActivities.Cells(DestRow, 1).PasteSpecial xlPasteAll
 
-    ' Transférez les valeurs sans formules
+    ' Transferez les valeurs sans formules
     Dim r As Long, c As Long
     For r = 4 To LastRow
       For c = 1 To LastCol
@@ -103,9 +102,9 @@ Sub getAllCodeActivities()
     'Passez au fichier suivant dans la liste
     i = i + 1
   Loop
-  'Réactivez les messages d'alerte
+  'Reactivez les messages d'alerte
   Application.DisplayAlerts = True
-  'Nettoyez le Presse-papiers pour libérer la mémoire
+  'Nettoyez le Presse-papiers pour liberer la memoire
   Application.CutCopyMode = False
 End Sub
 

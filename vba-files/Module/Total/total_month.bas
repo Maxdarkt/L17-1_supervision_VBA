@@ -17,7 +17,7 @@ Public Sub initTotalMonth()
 
   ' 2 - get all hours
   Call total_month.ConsolidateTotalMois()
-
+  Exit Sub
   ' 3 - coloration des jours non travailles
   Call total_month.colorNotWorkedDays()
 
@@ -50,6 +50,7 @@ Public Sub cleanTotalMonth()
     .Font.Bold = False
     .HorizontalAlignment = xlLeft
     .VerticalAlignment = xlCenter
+    .Font.Color = RGB(0, 0, 0)
     .IndentLevel = 0
   End With
 
@@ -57,7 +58,7 @@ Public Sub cleanTotalMonth()
 
 End Sub
 
-' 1 - On génère les dates du mois
+' 1 - On genère les dates du mois
 Public Sub generateDateMonth()
   ' Declaration de variables
   Dim arrDate() As String ' date saisie par l'utilisateur sous forme d'array
@@ -65,10 +66,10 @@ Public Sub generateDateMonth()
   Dim lastDay As Date
   Dim dateOfCol As Date
 
-  ' Appeler la fonction pour récupérer la liste des ouvrages
+  ' Appeler la fonction pour recuperer la liste des ouvrages
   workzones = general.getListWorkzones()
 
-  ' on récupère les cellules sous forme d'objet pour éviter les problème de format de date
+  ' on recupère les cellules sous forme d'objet pour eviter les problème de format de date
   arrDate = Split(Sheets(SHEET_NAME_CONFIG).range("F5").Value, ".")
 
   firstDay = "01." + arrDate(1) + "." + arrDate(2)
@@ -76,17 +77,18 @@ Public Sub generateDateMonth()
 
   nbDays = utils_date.CalculateDurationBetweenDates(firstDay, lastDay)
 
-  ' Déclarations de variables pour boucle
+  ' Declarations de variables pour boucle
   Dim i As Integer
   Dim j As Integer
   Dim firstRow As Integer
   Dim firstCol As Integer
   Dim varIsWorkingDay As Boolean
   Dim varIsDayNotWorked As Integer
+  Dim typeCol As Integer
 
   arrNotWorkedDays = utils_worked_days.NotWorkedDays()
 
-  firstRow = 3
+  firstRow = 4
   firstCol = 5
 
   For i = 1 To (day(nbDays) + 2)
@@ -98,42 +100,63 @@ Public Sub generateDateMonth()
 
     ' On teste si c'est un jour ferie national / projet
     varIsDayNotWorked = utils_worked_days.IsDayNotWorked(dateOfCol, arrNotWorkedDays())
-    
+
     ' On boucle sur la liste des ouvrages
     For j = LBound(workzones) To UBound(workzones)
-      ' Ecriture des cellules
-      With Sheets(SHEET_NAME_TOTAL_MONTH)
-      .Cells(firstRow, firstCol + (j - 1)).Value = dateOfCol
-      .Cells(firstRow, firstCol + (j - 1)).NumberFormat = "dd"
-      .Cells(firstRow, firstCol + (j - 1)).Font.Bold = True
-      .Cells(firstRow, firstCol + (j - 1)).HorizontalAlignment = xlCenter
-      .Cells(firstRow, firstCol + (j - 1)).VerticalAlignment = xlCenter
-      ' format date specialisée
-        .Cells(firstRow - 1, firstCol + (j - 1)).Formula = "=" & Replace(.Cells(firstRow, firstCol).Address, "$", "")
-        .Cells(firstRow - 1, firstCol + (j - 1)).NumberFormat = "ddd"
-        .Cells(firstRow - 1, firstCol + (j - 1)).HorizontalAlignment = xlCenter
-        .Cells(firstRow - 1, firstCol + (j - 1)).VerticalAlignment = xlCenter
-        ' Nom de l'ouvrage
-        .Cells(firstRow - 2, firstCol + (j - 1)).Value = workzones(j, 1)
-        .Cells(firstRow - 2, firstCol + (j - 1)).HorizontalAlignment = xlCenter
-        .Cells(firstRow - 2, firstCol + (j - 1)).VerticalAlignment = xlCenter
-        .Cells(firstRow - 2, firstCol + (j - 1)).Orientation = 90
-        .Cells(firstRow - 2, firstCol + (j - 1)).Interior.Color = workzones(j, 2)
-      End With
+      For typeCol = 1 To 2
+        ' Coloration de la cellule
+        If varIsDayNotWorked > 0 Or varIsWorkingDay = False Then
+          ' Si jour chôme
+          ' Coloration des cellules jour non travaillé
+          With sheets(SHEET_NAME_TOTAL_MONTH)
+            .Cells(firstRow, firstCol).Interior.color = COLOR_CEL_TM_DAY_NOT_WORKED
+            .Cells(firstRow - 1, firstCol).Interior.color = COLOR_CEL_TM_DAY_NOT_WORKED
+            .Cells(firstRow - 2, firstCol).Interior.color = COLOR_CEL_TM_DAY_NOT_WORKED
+          End With
+        Else    ' Si jour travaille, couleur de la cellule par defaut
+          ' Coloration des cellules jour travaillé
+          With sheets(SHEET_NAME_TOTAL_MONTH)
+            .Cells(firstRow, firstCol).Interior.color = COLOR_CEL_TM_DAY_WORKED
+            .Cells(firstRow - 1, firstCol).Interior.color = COLOR_CEL_TM_DAY_WORKED
+            .Cells(firstRow - 2, firstCol).Interior.color = COLOR_CEL_TM_DAY_WORKED
+          End With
+        End If
 
-      ' Coloration de la cellule
-      If varIsDayNotWorked > 0 Or varIsWorkingDay = False Then
-        sheets(SHEET_NAME_TOTAL_MONTH).Cells(firstRow, firstCol + (j - 1)).Interior.color = COLOR_CEL_TM_DAY_NOT_WORKED
-        sheets(SHEET_NAME_TOTAL_MONTH).Cells(firstRow - 1, firstCol + (j - 1)).Interior.color = COLOR_CEL_TM_DAY_NOT_WORKED
-      Else    ' Si jour travaille, couleur de la cellule par defaut
-        sheets(SHEET_NAME_TOTAL_MONTH).Cells(firstRow, firstCol + (j - 1)).Interior.color = COLOR_CEL_TM_DAY_WORKED
-        sheets(SHEET_NAME_TOTAL_MONTH).Cells(firstRow - 1, firstCol + (j - 1)).Interior.color = COLOR_CEL_TM_DAY_WORKED
-      End If
-    Next j
-
-    firstCol = firstCol + UBound(workzones)
+        ' Ecriture des cellules
+        With Sheets(SHEET_NAME_TOTAL_MONTH)
+          .Cells(firstRow, firstCol).Value = dateOfCol
+          .Cells(firstRow, firstCol).NumberFormat = "dd"
+          .Cells(firstRow, firstCol).Font.Bold = True
+          .Cells(firstRow, firstCol).HorizontalAlignment = xlCenter
+          .Cells(firstRow, firstCol).VerticalAlignment = xlCenter
+          ' On ecrit le jour dans la cellule "J" ou "N"
+          If typeCol = 1 Then
+            .Cells(firstRow - 1, firstCol).Value = "J"
+          Else
+            .Cells(firstRow - 1, firstCol).Value = "N"
+          End If
+          .Cells(firstRow - 1, firstCol).Font.Bold = True
+          .Cells(firstRow - 1, firstCol).HorizontalAlignment = xlCenter
+          .Cells(firstRow - 1, firstCol).VerticalAlignment = xlCenter
+          ' format date specialisee
+          .Cells(firstRow - 2, firstCol).Formula = "=" & Replace(.Cells(firstRow, firstCol).Address, "$", "")
+          .Cells(firstRow - 2, firstCol).NumberFormat = "ddd"
+          .Cells(firstRow - 2, firstCol).HorizontalAlignment = xlCenter
+          .Cells(firstRow - 2, firstCol).VerticalAlignment = xlCenter
+          ' Nom de l'ouvrage
+          .Cells(firstRow - 3, firstCol).Value = workzones(j, 1)
+          .Cells(firstRow - 3, firstCol).HorizontalAlignment = xlCenter
+          .Cells(firstRow - 3, firstCol).VerticalAlignment = xlCenter
+          .Cells(firstRow - 3, firstCol).Orientation = 90
+          .Cells(firstRow - 3, firstCol).Interior.Color = workzones(j, 2)
+          .Cells(firstRow - 3, firstCol).Font.Color = RGB(0, 0, 0)
+          ' format de cellule standard
+        End With
+        
+        firstCol = firstCol + 1
+        Next typeCol
+      Next j
   Next i
-
 End Sub
 
 Sub ConsolidateTotalMois()
@@ -148,7 +171,7 @@ Sub ConsolidateTotalMois()
   Dim wsSiteWorkZone As String
   DIm siteColOffset As Integer
 
-  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("C3")
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("C4")
     .Value = "NOM - PRENOM"
     .Font.Bold = True
     .HorizontalAlignment = xlLeft
@@ -157,7 +180,7 @@ Sub ConsolidateTotalMois()
     .IndentLevel = 1
   End With
 
-  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("D3")
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("D4")
     .Value = "ENTREPRISE"
     .Font.Bold = True
     .HorizontalAlignment = xlLeft
@@ -175,7 +198,7 @@ Sub ConsolidateTotalMois()
   
   ' Loop through each site
   For i = 5 To lastRowConfig
-    ' Désactiver les messages d'alerte
+    ' Desactiver les messages d'alerte
     Application.DisplayAlerts = False
     Application.AskToUpdateLinks = False
       ' Open site workbook
@@ -186,12 +209,13 @@ Sub ConsolidateTotalMois()
       siteColOffset = general.getPositionWorkzonesInArray(wsSiteWorkZone, workzones)
 
       ' Find last row in site's TOTAL_MOIS sheet
-      lastRowSite = 28
+      lastRowSite = 29
 
       ' Loop through each row (employee) in site's TOTAL_MOIS sheet
-      For j = 4 To lastRowSite
+      For j = 5 To lastRowSite
         Dim EmployeeRow As Long
         Dim FoundCell As Range
+        Dim typeCol As Integer
 
         employeeName = wsSite.Cells(j, 3).Value
         employeeCompany = wsSite.Cells(j, 4).Value
@@ -225,21 +249,25 @@ Sub ConsolidateTotalMois()
           End If
   
           ' Copy hours for each day and site
-          For colOffset = 1 To nbDays + 1
-            Dim adjustedCol As Integer
+          For colOffset = 0 To nbDays
+            ' Colonne Jour et Nuit
+            For typeCol = 1 To 2
+              Dim adjustedCol As Integer
 
-            adjustedCol = colOffset * UBound(workzones) + 3 + (siteColOffset - 1)
-            Hours = wsSite.Cells(j, colOffset + 4).Value
+              adjustedCol = colOffset * (UBound(workzones) * 2) + 5 + ((siteColOffset - 1) * 2) + (typeCol - 1)
+              Debug.Print "colOffset: " & colOffset & " - Ubound(workzones): " & UBound(workzones) & " - siteColOffset: " & siteColOffset & " - typeCol: " & typeCol & " - adjustedCol: " & adjustedCol
 
-            With wsConsolidation.Cells(EmployeeRow, adjustedCol)
-              .Value = Hours
-              .Font.Color = workzones(siteColOffset, 2)
-              .NumberFormat = "0.00"
-              .HorizontalAlignment = xlCenter
-              .VerticalAlignment = xlCenter
-              .Font.Bold = True
-            End With
-
+              Hours = wsSite.Cells(j, colOffset + (typeCol - 1) + 5).Value
+  
+              With wsConsolidation.Cells(EmployeeRow, adjustedCol)
+                .Value = Hours
+                .Font.Color = workzones(siteColOffset, 2)
+                .NumberFormat = "0.00"
+                .HorizontalAlignment = xlCenter
+                .VerticalAlignment = xlCenter
+                .Font.Bold = True
+              End With
+            Next typeCol
           Next colOffset
         End If
       Next j
@@ -291,7 +319,7 @@ Sub addSumByCol()
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
   lastCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, lastRow)
 
-  ' on ajoute le nom à la ligne
+  ' on ajoute le nom a la ligne
   With Sheets(SHEET_NAME_TOTAL_MONTH).Cells(lastRow + 1, 4)
     .value = "TOTAL"
     .Font.Bold = True
@@ -334,8 +362,8 @@ Sub addSumByRowByWorkzone()
   For i = LBound(workzones) To UBound(workzones)
     color = workzones(i, 2)
     ' ligne 1
-    ' la ligne 1 est laissé vide pour pouvoir compter la fin de mes colonnes du tableau de pointage
-    ' et séparée les colonnes de pointage des sous-totaux / totaux
+    ' la ligne 1 est laisse vide pour pouvoir compter la fin de mes colonnes du tableau de pointage
+    ' et separee les colonnes de pointage des sous-totaux / totaux
     ' ligne 2
     With Sheets(SHEET_NAME_TOTAL_MONTH).Cells(2, lastCol + i)
       .value = workzones(i, 1)
@@ -352,7 +380,7 @@ Sub addSumByRowByWorkzone()
       .VerticalAlignment = xlCenter
       .Interior.color = color
     End With
-    ' on définit la formule pour chaque ligne
+    ' on definit la formule pour chaque ligne
     For j = firstRow + 1 To lastRow
       With Sheets(SHEET_NAME_TOTAL_MONTH).Cells(j, lastCol + i)
         .Formula = getFormulaByRowByWorkzone(j, workzones(i, 1), firstCol, lastCol, SHEET_NAME_TOTAL_MONTH)
@@ -383,7 +411,7 @@ Sub addSumByRow()
   
   firstColTotalByWorkzone = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 1)
   lastColTotalByWorkzone = firstColTotalByWorkzone + UBound(workzones)
-  ' on ajuste le départ de la colonne
+  ' on ajuste le depart de la colonne
   firstColTotalByWorkzone = firstColTotalByWorkzone + 1
   ' on nomme la colonne
   With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(2, lastColTotalByWorkzone + 1), Cells(3, lastColTotalByWorkzone + 1))
@@ -397,7 +425,7 @@ Sub addSumByRow()
 
   firstRow = 4
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
-  ' on créé les formules
+  ' on cree les formules
   For i = firstRow To lastRow
     With Sheets(SHEET_NAME_TOTAL_MONTH).Cells(i, lastColTotalByWorkzone + 1)
       .Formula = "=SUM(" & Replace(Cells(i, firstColTotalByWorkzone).Address, "$", "") & ":" & Replace(Cells(i, lastColTotalByWorkzone).Address, "$", "") & ")"

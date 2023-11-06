@@ -40,9 +40,9 @@ Sub generateAllReportsInPDF()
   Dim nbDays As Integer
   Dim workzone As String
 
-  ' Référencer la feuille de configuration
+  ' Referencer la feuille de configuration
   Set wsConfig = ThisWorkbook.Sheets(SHEET_NAME_CONFIG)
-  ' Définir les dates
+  ' Definir les dates
   firstDay = Sheets(SHEET_NAME_SEND_EMAIL).Range("D4").Value
   lastDay = Sheets(SHEET_NAME_SEND_EMAIL).Range("H4").Value
   ' Nombre de jours entre 2 dates
@@ -55,17 +55,17 @@ Sub generateAllReportsInPDF()
   For i = firstRowFiles To lastRowFiles
     Dim filePathExcel As String
     Dim filePathPDF As String
-    ' Désactiver les messages d'alerte
+    ' Desactiver les messages d'alerte
     Application.DisplayAlerts = False
     Application.AskToUpdateLinks = False
-    ' On définit le chemin d'accès au fichier excel et le nom de l'ouvrage
+    ' On definit le chemin d'accès au fichier excel et le nom de l'ouvrage
     filePathExcel = wsConfig.Cells(i, 4).Value
     workzone = wsConfig.Cells(i, 5).Value
     ' Open site workbook
     Set wbSite = Workbooks.Open(filePathExcel)
-    ' on génère le rapport de poste et on reçoit le chemin d'accès au PDF
+    ' on genère le rapport de poste et on reçoit le chemin d'accès au PDF
     filePathPDF = printManyReportsInPDF(wbSite, firstDay, lastDay, nbDays, workzone)
-    ' On écrit le nom du fichier dans la colonne C
+    ' On ecrit le nom du fichier dans la colonne C
     ThisWorkbook.Sheets(SHEET_NAME_SEND_EMAIL).Cells(i + 6, 3).Value = filePathPDF
     ' Close site workbook
     wbSite.Close SaveChanges:=False
@@ -86,18 +86,18 @@ Public Function printManyReportsInPDF(wbSite As Workbook, firstDay As Date, last
   Dim address As String
   Dim i As Integer
 
-  'Spécidier le nom du fichier PDF temporaire
+  'Specidier le nom du fichier PDF temporaire
   pdfFilename = "TempPDF.pdf"
-  ' spécifier l'année
+  ' specifier l'annee
   yearOfReport = Format(firstDay, "yyyy")
-  ' spécifier le numéro de semaine
+  ' specifier le numero de semaine
   nbWeek = DatePart("ww", firstDay, vbMonday)
-  ' Spécifiez le chemin de sortie pour le PDF combiné
+  ' Specifiez le chemin de sortie pour le PDF combine
   outputPath = print_report.getPathExportPDF("PDF\") & yearOfReport & "_S-" & nbWeek & "_Rapport_de_poste_OA" & workzone & ".pdf"
   ' print area
   address = "AA3:AR107"
 
-  ' Créez un nouveau classeur temporaire pour imprimer les feuilles
+  ' Creez un nouveau classeur temporaire pour imprimer les feuilles
   Workbooks.Add
 
   ' on boucle sur le nombre de jours
@@ -116,7 +116,7 @@ Public Function printManyReportsInPDF(wbSite As Workbook, firstDay As Date, last
 
     ws.Copy Before:=ActiveWorkbook.Sheets(1)
         
-    ' Définissez la zone d'impression identique sur chaque feuille
+    ' Definissez la zone d'impression identique sur chaque feuille
     ActiveSheet.PageSetup.PrintArea = address ' Personnalisez cette plage selon vos besoins
 
   Next i
@@ -125,7 +125,7 @@ Public Function printManyReportsInPDF(wbSite As Workbook, firstDay As Date, last
     
   ' Fermez le classeur temporaire sans enregistrer les modifications
   ActiveWorkbook.Close SaveChanges:=False
-  ' Vérifier si le fichier existe déjà
+  ' Verifier si le fichier existe deja
   If Dir(outputPath) <> "" Then
       ' Supprimez le fichier existant s'il existe
       Kill outputPath

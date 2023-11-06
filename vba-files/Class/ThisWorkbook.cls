@@ -14,7 +14,7 @@ Public Sub Workbook_Open()
   Call general.DefineGlobalVariables()
 End Sub
 
-' Declenchement à l'activation d'une feuille
+' Declenchement a l'activation d'une feuille
 Private Sub Workbook_SheetActivate(ByVal Sh As Object)
   Call general.DefineGlobalVariables()
 End Sub
