@@ -17,7 +17,7 @@ Public Sub initTotalMonth()
 
   ' 2 - get all hours
   Call total_month.ConsolidateTotalMois()
-  Exit Sub
+
   ' 3 - coloration des jours non travailles
   Call total_month.colorNotWorkedDays()
 
@@ -255,7 +255,6 @@ Sub ConsolidateTotalMois()
               Dim adjustedCol As Integer
 
               adjustedCol = colOffset * (UBound(workzones) * 2) + 5 + ((siteColOffset - 1) * 2) + (typeCol - 1)
-              Debug.Print "colOffset: " & colOffset & " - Ubound(workzones): " & UBound(workzones) & " - siteColOffset: " & siteColOffset & " - typeCol: " & typeCol & " - adjustedCol: " & adjustedCol
 
               Hours = wsSite.Cells(j, colOffset + (typeCol - 1) + 5).Value
   
@@ -313,7 +312,7 @@ Sub addSumByCol()
   Dim j As Integer
   Dim Color As Variant
 
-  firstRow = 3
+  firstRow = 4
   firstCol = 5
 
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
