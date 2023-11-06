@@ -474,7 +474,7 @@ Sub ApplyConditionalFormatting()
   lastCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 1)
 
   ' Définir la plage de cellules
-  Set rng = ws.Range(Cells(5, 5), Cells(lastRow, lastCol))
+  Set rng = ws.Range(Cells(6, 5), Cells(lastRow, lastCol))
 
   ' Mise en forme conditionnelle pour les cellules supérieures à 10
   With rng.FormatConditions.Add(Type:=xlCellValue, Operator:=xlGreater, Formula1:="10")
