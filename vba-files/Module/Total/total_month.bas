@@ -9,28 +9,35 @@ Dim arrNotWorkedDays() As Date
 ' Action button
 Public Sub initTotalMonth()
 
-  ' 0 - clean plage
+  ' 0 - On nettoite les cellules
   Call total_month.cleanTotalMonth()
 
-  ' 1 - generer les dates et les ovurages
+  ' 1 - On genere les dates et les ouvrages
   Call total_month.generateDateMonth()
 
-  ' 2 - get all hours
+  ' 2 - On recupere les heures de chaque personnes de chaque site
   Call total_month.ConsolidateTotalMois()
 
   ' 3 - coloration des jours non travailles
   Call total_month.colorNotWorkedDays()
 
-  ' 4 - add sum by col
+  ' 4 - Ajout de la somme par colonne
   Call total_month.addSumByCol()
 
-  ' 5 - add sum by row by workzone
+  ' 5 - Ajout de la somme par ligne par ouvrage
   Call total_month.addSumByRowByWorkzone()
 
-  ' 6 - add sum by row
+  ' 6 - Ajout de la somme par ligne Totale
   Call total_month.addSumByRow()
+
+  ' 7 - Mise en forme conditionnelle
+  Call total_month.ApplyConditionalFormatting()
+
+  ' 8 - On copie l'équipe pour le synthèse des heures par semaine
+  Call total_month.CopyTeam()
 End Sub
 
+' 0 - On nettoie les cellules
 Public Sub cleanTotalMonth()
   Dim firstCol As Integer
   Dim firstRow As Integer
@@ -40,7 +47,7 @@ Public Sub cleanTotalMonth()
   firstRow = 1
   firstCol = 3
 
-  lastCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
+  lastCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 5)
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, firstCol)
 
   With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(firstRow, firstCol), Cells(lastRow + 1, lastCol + 1))
@@ -88,7 +95,7 @@ Public Sub generateDateMonth()
 
   arrNotWorkedDays = utils_worked_days.NotWorkedDays()
 
-  firstRow = 4
+  firstRow = 5
   firstCol = 5
 
   For i = 1 To (day(nbDays) + 2)
@@ -150,6 +157,12 @@ Public Sub generateDateMonth()
           .Cells(firstRow - 3, firstCol).Orientation = 90
           .Cells(firstRow - 3, firstCol).Interior.Color = workzones(j, 2)
           .Cells(firstRow - 3, firstCol).Font.Color = RGB(0, 0, 0)
+          ' Formule N° semaine
+          .Cells(firstRow - 4, firstCol).Formula = "=IF(" & Cells(firstRow, firstCol).Address & "<>"""", ISOWEEKNUM(" & Cells(firstRow, firstCol).Address & "), """")"
+          .Cells(firstRow - 4, firstCol).HorizontalAlignment = xlCenter
+          .Cells(firstRow - 4, firstCol).VerticalAlignment = xlCenter
+          .Cells(firstRow - 4, firstCol).Orientation = 0
+          .Cells(firstRow - 4, firstCol).Font.Color = RGB(0, 0, 0)
           ' format de cellule standard
         End With
         
@@ -159,6 +172,7 @@ Public Sub generateDateMonth()
   Next i
 End Sub
 
+' 2 - On recupere les heures de chaque personnes de chaque site
 Sub ConsolidateTotalMois()
 
   Dim wsConfig As Worksheet, wsConsolidation As Worksheet
@@ -171,7 +185,7 @@ Sub ConsolidateTotalMois()
   Dim wsSiteWorkZone As String
   DIm siteColOffset As Integer
 
-  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("C4")
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("C5")
     .Value = "NOM - PRENOM"
     .Font.Bold = True
     .HorizontalAlignment = xlLeft
@@ -180,7 +194,7 @@ Sub ConsolidateTotalMois()
     .IndentLevel = 1
   End With
 
-  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("D4")
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range("D5")
     .Value = "ENTREPRISE"
     .Font.Bold = True
     .HorizontalAlignment = xlLeft
@@ -209,7 +223,7 @@ Sub ConsolidateTotalMois()
       siteColOffset = general.getPositionWorkzonesInArray(wsSiteWorkZone, workzones)
 
       ' Find last row in site's TOTAL_MOIS sheet
-      lastRowSite = 29
+      lastRowSite = 30
 
       ' Loop through each row (employee) in site's TOTAL_MOIS sheet
       For j = 5 To lastRowSite
@@ -278,6 +292,7 @@ Sub ConsolidateTotalMois()
   Next i
 End Sub
 
+' 3 - Coloration des jours non travailles
 Sub colorNotWorkedDays()
   Dim firstRow As Integer
   Dim firstCol As Integer
@@ -287,7 +302,7 @@ Sub colorNotWorkedDays()
   Dim j As Integer
   Dim varIsDayNotWorked As Boolean
 
-  firstRow = 3
+  firstRow = 5
   firstCol = 5
 
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
@@ -303,6 +318,7 @@ Sub colorNotWorkedDays()
   Next j
 End Sub
 
+' 4 - Ajout de la somme par colonne
 Sub addSumByCol()
   Dim firstRow As Integer
   Dim firstCol As Integer
@@ -312,7 +328,7 @@ Sub addSumByCol()
   Dim j As Integer
   Dim Color As Variant
 
-  firstRow = 4
+  firstRow = 5
   firstCol = 5
 
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
@@ -339,9 +355,9 @@ Sub addSumByCol()
       .Interior.color = COLOR_CEL_READ_CONTENT
     End With
   Next j
-
 End Sub
 
+' 5 - Ajout de la somme par ligne par ouvrage
 Sub addSumByRowByWorkzone()
   Dim firstRow As Integer
   Dim firstCol As Integer
@@ -351,7 +367,7 @@ Sub addSumByRowByWorkzone()
   Dim j As Integer
   Dim Color As Variant
 
-  firstRow = 3
+  firstRow = 4
   firstCol = 5
 
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
@@ -372,7 +388,8 @@ Sub addSumByRowByWorkzone()
       .Interior.color = color
     End With
     ' ligne 3
-    With Sheets(SHEET_NAME_TOTAL_MONTH).Cells(3, lastCol + i)
+    With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(3, lastCol + i), Cells(4, lastCol + i))
+      .Merge
       .value = "TOTAL"
       .Font.Bold = True
       .HorizontalAlignment = xlCenter
@@ -401,6 +418,7 @@ Function getFormulaByRowByWorkzone(row As Integer, workzone As Variant, firstCol
   getFormulaByRowByWorkzone = "=SUMIF(" & Cells(1, firstCol).Address & ":" & Cells(1, lastCol).Address & ",""" & workzone & """," & Replace(Cells(row, firstCol).Address, "$", "") & ":" & Replace(Cells(row, lastCol).Address, "$", "") & ")"
 End Function
 
+' 6 - Ajout de la somme par ligne Totale
 Sub addSumByRow()
   Dim firstColTotalByWorkzone As Integer
   Dim lastColTotalByWorkzone As Integer
@@ -413,7 +431,7 @@ Sub addSumByRow()
   ' on ajuste le depart de la colonne
   firstColTotalByWorkzone = firstColTotalByWorkzone + 1
   ' on nomme la colonne
-  With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(2, lastColTotalByWorkzone + 1), Cells(3, lastColTotalByWorkzone + 1))
+  With Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(2, lastColTotalByWorkzone + 1), Cells(4, lastColTotalByWorkzone + 1))
     .Merge
     .value = "TOTAL"
     .Font.Bold = True
@@ -422,7 +440,7 @@ Sub addSumByRow()
     .Interior.color = COLOR_CEL_READ_CONTENT
   End With
 
-  firstRow = 4
+  firstRow = 5
   lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
   ' on cree les formules
   For i = firstRow To lastRow
@@ -438,5 +456,194 @@ Sub addSumByRow()
 
 End Sub
 
+' 7 - Mise en place des mises en forme conditionnelles > 8h et > 10h
+Sub ApplyConditionalFormatting()
+
+  Dim ws As Worksheet
+  Dim rng As Range
+  Dim lastRow As Integer
+  Dim lastCol As Integer
+
+  ' Définir la feuille de calcul et la plage de cellules pour la mise en forme conditionnelle
+  Set ws = Sheets(SHEET_NAME_TOTAL_MONTH)
+
+  ' On supprimer toutes les mise en formes conditionnelles de toute la feuille
+  ws.Cells.FormatConditions.Delete
+
+  lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
+  lastCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 1)
+
+  ' Définir la plage de cellules
+  Set rng = ws.Range(Cells(5, 5), Cells(lastRow, lastCol))
+
+  ' Mise en forme conditionnelle pour les cellules supérieures à 10
+  With rng.FormatConditions.Add(Type:=xlCellValue, Operator:=xlGreater, Formula1:="10")
+      .Interior.Color = RGB(255, 150, 150) ' Rouge clair pour le fond (à ajuster)
+      .Font.Color = RGB(200, 0, 0) ' Rouge foncé pour la police (à ajuster)
+  End With
+
+  ' Mise en forme conditionnelle pour les cellules supérieures à 8
+  With rng.FormatConditions.Add(Type:=xlCellValue, Operator:=xlGreater, Formula1:="8")
+      .Interior.Color = RGB(255, 200, 0) ' Orange clair pour le fond (à ajuster)
+      .Font.Color = RGB(255, 100, 0) ' Orange foncé pour la police (à ajuster)
+  End With
+
+End Sub
+
+' 9 - On copie l'équipe pour le synthèse des heures par semaine
+Sub CopyTeam ()
+  Dim firstRow As Integer
+  Dim firstCol As Integer
+  Dim lastRow As Integer
+  Dim lastCol As Integer
+  Dim i As Integer
+  Dim j As Integer
+  Dim Color As Variant
+  Dim ws As Worksheet
+
+  Set ws = ThisWorkbook.Sheets(SHEET_NAME_TOTAL_MONTH)
+
+  firstRow = 5
+  firstCol = 3
+
+  lastRow = utils_sheets.LastNumberColNotEmpty(SHEET_NAME_TOTAL_MONTH, 3)
+  lastCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 1)
+
+  ws.Range(ws.Cells(firstRow, firstCol), ws.Cells(lastRow, firstCol + 1)).Copy
+
+  ws.Cells(lastRow + 10, firstCol).PasteSpecial Paste:=xlPasteAll
+
+  ' 10 - On ecrit les numeros de semaine dans les cellules
+  Call total_month.createNumberWeekForCheckHoursByWeek(lastRow + 10, lastCol)
+  ' 11 - On ajoute la somme par ligne par semaine
+  Call total_month.addSumByRowByWeek(lastRow + 10, lastRow - firstRow)
+End Sub
+
+' 10 - On ecrit les numeros de semaine dans les cellules
+Public Sub createNumberWeekForCheckHoursByWeek(firstRow As Integer, lastCol As Integer)
+  Dim plage As Range
+  Dim cell As Range
+  Dim firstCol As Integer
+  Dim num As Integer
+  Dim i As Integer
+
+  firstCol = 5
+  num = 0
+  i = 0
+
+  Set plage = Sheets(SHEET_NAME_TOTAL_MONTH).Range(Cells(5, 5), Cells(5, lastCol))
+
+  For Each cell In plage.cells
+    If cell.Value <> "" Then
+      If num <> total_month.NumberWeek(cell.Value) Then
+        num = total_month.NumberWeek(cell.Value)
+        Cells(firstRow, firstCol + i).Value = num
+        Cells(firstRow, firstCol + i).NumberFormat = "0"
+        Cells(firstRow, firstCol + i).HorizontalAlignment = xlCenter
+        Cells(firstRow, firstCol + i).VerticalAlignment = xlCenter
+        Cells(firstRow, firstCol + i).Font.Bold = True
+        Cells(firstRow, firstCol + i).Interior.color = COLOR_CEL_READ_H2
+        i = i + 1
+      End If
+    End If
+  Next cell
+
+End Sub
+
+' Recuperer le numero de la semaine
+Public Function NumberWeek(cellDate As String) As Integer
+  Dim myDate As Date
+  Dim arrDate() As String
+
+  arrDate() = Split(cellDate, ".")
+  ' Definissez votre date
+  myDate = DateSerial(arrDate(2), arrDate(1), arrDate(0)) ' Exemple de date (annee, mois, jour)
+  
+  ' Utilisez la fonction DatePart pour obtenir le numero de semaine
+  NumberWeek = DatePart("ww", myDate)
+End Function
+
+' 11 - On ajoute la somme par ligne par semaine
+Sub AddSumByRowByWeek(firstRow As Integer, length As Integer)
+  Dim i As Integer
+  Dim firstCol As Integer
+  Dim nbCells As Integer
+
+  firstCol = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, firstRow) + 1
+
+  Cells(firstRow, firstCol).Value = "TOTAL"
+  Cells(firstRow, firstCol).Interior.color = COLOR_CEL_READ_H2
+
+  nbCells = firstCol - 5
+
+  For i = firstRow + 1 To (firstRow + length)
+    Cells(i, firstCol).Formula = "=SUM(" & Replace(Cells(i, 5).Address, "$", "") & ":" & Replace(Cells(i, firstCol).Address, "$", "") & ")"
+    Cells(i, firstCol).NumberFormat = "0.00"
+    Cells(i, firstCol).HorizontalAlignment = xlCenter
+    Cells(i, firstCol).VerticalAlignment = xlCenter
+    Cells(i, firstCol).Font.Bold = True
+    Cells(i, firstCol).Interior.color = COLOR_CEL_READ_H2
+  Next i
+
+  ' 12 - On remplie les cellules avec les formules pour récupérer les heures de chaque personne
+  Call total_month.fillSumHoursByWeek(firstRow, length, nbCells)
+
+End Sub
+
+' 12 - On remplie les cellules avec les formules pour récupérer les heures de chaque personne
+Sub fillSumHoursByWeek(firstRow As Integer, length As Integer, nbCells As Integer)
+  Dim firstRowSource As Integer
+  Dim lastRowSource As Integer
+  Dim lastColWeek As Integer
+  Dim i As Integer
+  Dim c As Integer
+
+  firstRowSource = firstRow - length - (10 - 1)
+  lastRowSource = firstRowSource + length - 1
+
+  lastColWeek = utils_sheets.LastNumberRowNotEmpty(SHEET_NAME_TOTAL_MONTH, 1)
+
+  For i = firstRow + 1 To (firstRow + length)
+    For c = 1 To nbCells
+      ' somme si la semaine est la meme
+      Cells(i, c + 4).Formula = "=SUMIF(" & Replace(Cells(1, 5).Address, "$", "") & ":" & Replace(Cells(1, lastColWeek).Address, "$", "") & "," & Replace(Cells(firstRow, c + 4).Address, "$", "") & "," & Replace(Cells(firstRowSource + (i - firstRow - 1), 5).Address, "$", "") & ":" & Replace(Cells(firstRowSource + (i - firstRow - 1), lastColWeek).Address, "$", "") & ")"
+      Cells(i, c + 4).NumberFormat = "0.00"
+      Cells(i, c + 4).HorizontalAlignment = xlCenter
+      Cells(i, c + 4).VerticalAlignment = xlCenter
+      Cells(i, c + 4).Font.Bold = True
+      Cells(i, c + 4).Interior.color = COLOR_CEL_READ_CONTENT
+    Next c
+  Next i
+
+  Call total_month.ApplyConditionalFormattingForWeek(firstRow, lastColWeek, length)
+End Sub
+
+' 13 - Mise en place des mises en forme conditionnelles > 8h et > 10h
+Sub ApplyConditionalFormattingForWeek(firstRowWeek As Integer, lastColWeek As Integer, length As Integer)
+
+  Dim ws As Worksheet
+  Dim rng As Range
+  Dim lastRow As Integer
+  Dim lastCol As Integer
+
+  ' Définir la feuille de calcul et la plage de cellules pour la mise en forme conditionnelle
+  Set ws = Sheets(SHEET_NAME_TOTAL_MONTH)
+
+  ' Définir la plage de cellules
+  Set rng = ws.Range(Cells(firstRowWeek + 1, 5), Cells(firstRowWeek + length, lastColWeek))
+
+  ' Mise en forme conditionnelle pour les cellules supérieures à 10
+  With rng.FormatConditions.Add(Type:=xlCellValue, Operator:=xlGreater, Formula1:="48")
+      .Interior.Color = RGB(255, 150, 150) ' Rouge clair pour le fond (à ajuster)
+      .Font.Color = RGB(200, 0, 0) ' Rouge foncé pour la police (à ajuster)
+  End With
+
+  ' Mise en forme conditionnelle pour les cellules supérieures à 8
+  With rng.FormatConditions.Add(Type:=xlCellValue, Operator:=xlGreater, Formula1:="44")
+      .Interior.Color = RGB(255, 200, 0) ' Orange clair pour le fond (à ajuster)
+      .Font.Color = RGB(255, 100, 0) ' Orange foncé pour la police (à ajuster)
+  End With
+
+End Sub
 
 
