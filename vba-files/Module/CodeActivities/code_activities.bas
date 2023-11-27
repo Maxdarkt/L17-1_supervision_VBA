@@ -12,7 +12,7 @@ Public Sub initCodeActivities()
   Call code_activities.getAllCodeActivities()
 End Sub
 
-Sub cleanCodeActivities()
+Private Sub cleanCodeActivities()
   Dim firstCol As Integer
   Dim firstRow As Integer
   Dim lastCol As Integer
@@ -35,7 +35,7 @@ Sub cleanCodeActivities()
 
 End Sub
 
-Sub getAllCodeActivities()
+Private Sub getAllCodeActivities()
 
   Dim wsConfig As Worksheet
   Dim wsCodeActivities As Worksheet

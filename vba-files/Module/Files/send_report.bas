@@ -19,7 +19,7 @@ Public Sub sendReportsByEmail()
   Call send_report.getAllInformationsForEditMail()
 End Sub
 
-Public Sub getAllPathOfPDF()
+Private Sub getAllPathOfPDF()
   Dim plage As Range
   Dim cell As Range
   Dim localPaths As String

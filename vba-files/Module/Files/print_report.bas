@@ -13,7 +13,7 @@ Public Sub generatePDF()
 
 End Sub
 
-Sub cleanGeneratePDF()
+Private Sub cleanGeneratePDF()
   Dim address As String
 
   address = "C11:I25"
@@ -29,7 +29,7 @@ Sub cleanGeneratePDF()
 
 End Sub
 
-Sub generateAllReportsInPDF()
+Private Sub generateAllReportsInPDF()
   Dim firstRowFiles As Integer
   Dim lastRowFiles As Integer
   Dim i As Integer
@@ -77,7 +77,7 @@ Sub generateAllReportsInPDF()
 End Sub
 
 ' Imprimer le rapport de poste
-Public Function printManyReportsInPDF(wbSite As Workbook, firstDay As Date, lastDay As Date, nbDays As Integer, workzone As String) As String
+Private  Function printManyReportsInPDF(wbSite As Workbook, firstDay As Date, lastDay As Date, nbDays As Integer, workzone As String) As String
   Dim newWorkbook As Workbook
   Dim pdfFilename As String
   Dim outputPath As String
@@ -107,7 +107,7 @@ Public Function printManyReportsInPDF(wbSite As Workbook, firstDay As Date, last
     Dim formatedDate As String
     Dim ws As Worksheet
     ' ici on reformatte la date pour le nom du fichier
-    arrDate = Split(firstDay, ".")
+    arrDate = Split(firstDay, "/")
     dateOfSheet = DateSerial(arrDate(2), arrDate(1), arrDate(0))
     dateOfSheet = DateAdd("d", i, firstDay)
     formatedDate = Format(dateOfSheet, "yyyy-mm-dd")

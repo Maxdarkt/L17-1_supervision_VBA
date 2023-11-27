@@ -38,7 +38,7 @@ Public Sub initTotalMonth()
 End Sub
 
 ' 0 - On nettoie les cellules
-Public Sub cleanTotalMonth()
+Private Sub cleanTotalMonth()
   Dim firstCol As Integer
   Dim firstRow As Integer
   Dim lastCol As Integer
@@ -66,7 +66,7 @@ Public Sub cleanTotalMonth()
 End Sub
 
 ' 1 - On genère les dates du mois
-Public Sub generateDateMonth()
+Private Sub generateDateMonth()
   ' Declaration de variables
   Dim arrDate() As String ' date saisie par l'utilisateur sous forme d'array
   Dim firstDay As Date
@@ -77,9 +77,9 @@ Public Sub generateDateMonth()
   workzones = general.getListWorkzones()
 
   ' on recupère les cellules sous forme d'objet pour eviter les problème de format de date
-  arrDate = Split(Sheets(SHEET_NAME_CONFIG).range("F5").Value, ".")
+  arrDate = Split(Sheets(SHEET_NAME_CONFIG).range("F5").Value, "/")
 
-  firstDay = "01." + arrDate(1) + "." + arrDate(2)
+  firstDay = "01/" + arrDate(1) + "/" + arrDate(2)
   lastDay = utils_date.LastDayOfMonth(CLng(arrDate(1)), CLng(arrDate(2)))
 
   nbDays = utils_date.CalculateDurationBetweenDates(firstDay, lastDay)
@@ -173,7 +173,7 @@ Public Sub generateDateMonth()
 End Sub
 
 ' 2 - On recupere les heures de chaque personnes de chaque site
-Sub ConsolidateTotalMois()
+Private Sub ConsolidateTotalMois()
 
   Dim wsConfig As Worksheet, wsConsolidation As Worksheet
   Dim lastRowConfig As Long, i As Long
@@ -293,7 +293,7 @@ Sub ConsolidateTotalMois()
 End Sub
 
 ' 3 - Coloration des jours non travailles
-Sub colorNotWorkedDays()
+Private Sub colorNotWorkedDays()
   Dim firstRow As Integer
   Dim firstCol As Integer
   Dim lastRow As Integer
@@ -319,7 +319,7 @@ Sub colorNotWorkedDays()
 End Sub
 
 ' 4 - Ajout de la somme par colonne
-Sub addSumByCol()
+Private Sub addSumByCol()
   Dim firstRow As Integer
   Dim firstCol As Integer
   Dim lastRow As Integer
@@ -351,14 +351,14 @@ Sub addSumByCol()
       .Font.Bold = True
       .HorizontalAlignment = xlCenter
       .VerticalAlignment = xlCenter
-      .Font.Color = color
+      .Font.Color = RGB(0, 0, 0)
       .Interior.color = COLOR_CEL_READ_CONTENT
     End With
   Next j
 End Sub
 
 ' 5 - Ajout de la somme par ligne par ouvrage
-Sub addSumByRowByWorkzone()
+Private Sub addSumByRowByWorkzone()
   Dim firstRow As Integer
   Dim firstCol As Integer
   Dim lastRow As Integer
@@ -411,7 +411,7 @@ Sub addSumByRowByWorkzone()
   Next i
 End Sub
 
-Function getFormulaByRowByWorkzone(row As Integer, workzone As Variant, firstCol As Integer, lastCol As Integer, sheetName As String) As String
+Private Function getFormulaByRowByWorkzone(row As Integer, workzone As Variant, firstCol As Integer, lastCol As Integer, sheetName As String) As String
   Dim colArray() As Long
 
   ' SUMIF (range, criteria, [sum_range])
@@ -419,7 +419,7 @@ Function getFormulaByRowByWorkzone(row As Integer, workzone As Variant, firstCol
 End Function
 
 ' 6 - Ajout de la somme par ligne Totale
-Sub addSumByRow()
+Private Sub addSumByRow()
   Dim firstColTotalByWorkzone As Integer
   Dim lastColTotalByWorkzone As Integer
   Dim firstRow As Integer
@@ -457,7 +457,7 @@ Sub addSumByRow()
 End Sub
 
 ' 7 - Mise en place des mises en forme conditionnelles > 8h et > 10h
-Sub ApplyConditionalFormatting()
+Private Sub ApplyConditionalFormatting()
 
   Dim ws As Worksheet
   Dim rng As Range
@@ -491,7 +491,7 @@ Sub ApplyConditionalFormatting()
 End Sub
 
 ' 9 - On copie l'équipe pour le synthèse des heures par semaine
-Sub CopyTeam ()
+Private Sub CopyTeam()
   Dim firstRow As Integer
   Dim firstCol As Integer
   Dim lastRow As Integer
@@ -520,7 +520,7 @@ Sub CopyTeam ()
 End Sub
 
 ' 10 - On ecrit les numeros de semaine dans les cellules
-Public Sub createNumberWeekForCheckHoursByWeek(firstRow As Integer, lastCol As Integer)
+Private Sub createNumberWeekForCheckHoursByWeek(firstRow As Integer, lastCol As Integer)
   Dim plage As Range
   Dim cell As Range
   Dim firstCol As Integer
@@ -555,7 +555,7 @@ Public Function NumberWeek(cellDate As String) As Integer
   Dim myDate As Date
   Dim arrDate() As String
 
-  arrDate() = Split(cellDate, ".")
+  arrDate() = Split(cellDate, "/")
   ' Definissez votre date
   myDate = DateSerial(arrDate(2), arrDate(1), arrDate(0)) ' Exemple de date (annee, mois, jour)
   
@@ -564,7 +564,7 @@ Public Function NumberWeek(cellDate As String) As Integer
 End Function
 
 ' 11 - On ajoute la somme par ligne par semaine
-Sub AddSumByRowByWeek(firstRow As Integer, length As Integer)
+Private Sub AddSumByRowByWeek(firstRow As Integer, length As Integer)
   Dim i As Integer
   Dim firstCol As Integer
   Dim nbCells As Integer
@@ -591,7 +591,7 @@ Sub AddSumByRowByWeek(firstRow As Integer, length As Integer)
 End Sub
 
 ' 12 - On remplie les cellules avec les formules pour récupérer les heures de chaque personne
-Sub fillSumHoursByWeek(firstRow As Integer, length As Integer, nbCells As Integer)
+Private Sub fillSumHoursByWeek(firstRow As Integer, length As Integer, nbCells As Integer)
   Dim firstRowSource As Integer
   Dim lastRowSource As Integer
   Dim lastColWeek As Integer
@@ -619,7 +619,7 @@ Sub fillSumHoursByWeek(firstRow As Integer, length As Integer, nbCells As Intege
 End Sub
 
 ' 13 - Mise en place des mises en forme conditionnelles > 8h et > 10h
-Sub ApplyConditionalFormattingForWeek(firstRowWeek As Integer, lastColWeek As Integer, length As Integer)
+Private Sub ApplyConditionalFormattingForWeek(firstRowWeek As Integer, lastColWeek As Integer, length As Integer)
 
   Dim ws As Worksheet
   Dim rng As Range

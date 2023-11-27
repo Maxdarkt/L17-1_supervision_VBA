@@ -30,8 +30,7 @@ Public ARR_SELECTED_SUBACTIVITIES AS Collection
 Public ARR_SELECTED_SUBACTIVITIES_ID() AS Variant
 Public ARR_CODE_ACTIVITIES_INFOS AS Collection
 
-
-Public  Sub DefineGlobalVariables()
+Public Sub DefineGlobalVariables()
   
   ' On definit les variables couleurs
   COLOR_CEL_WHITE = RGB(255, 255, 255)
@@ -48,6 +47,8 @@ Public  Sub DefineGlobalVariables()
 
   COLOR_CEL_TM_DAY_WORKED = RGB(204, 255, 204)
   COLOR_CEL_TM_DAY_NOT_WORKED = RGB(83, 141, 213)
+
+  Debug.Print "DefineGlobalVariables : " & COLOR_CEL_TASK_CODE
   
 End Sub
 
@@ -70,31 +71,6 @@ Public Sub cleanCells()
   Sheets(SHEET_NAME_CONFIG).Range(address).ClearContents
 
 End Sub
-
-' ancienne fonction pour aller recuperer les fichiers dans un dossier
-' Public Sub getAllExcelFiles()
-'   Dim pathFolder As String
-'   Dim filename As String
-'   Dim pathFilename As String
-'   Dim i As Integer
-  
-'   i = 0
-  
-'   ' Specifiez le chemin du dossier contenant les fichiers Excel
-'   pathFolder = utils_path.getPathFolder("reports\")
-  
-'   filename = Dir(pathFolder & "*.xls*")
-'   ' Parcourez tous les fichiers Excel dans le dossier
-'   Do While filename <> ""
-'     ' Construisez le chemin complet du fichier
-'     pathFilename = pathFolder & filename
-'     ' On ecrit les chemins des fichiers dans la feuille CONFIG
-'     Sheets(SHEET_NAME_CONFIG).Cells(5 + i, 11).Value = pathFilename
-'     ' Obtenez le prochain fichier Excel dans le dossier
-'     filename = Dir
-'     i = i + 1
-'   Loop
-' End Sub
 
 Sub initFilesByWorkzone()
 
